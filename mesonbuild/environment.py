@@ -68,6 +68,7 @@ from .compilers import (
     IntelClFortranCompiler,
     JavaCompiler,
     MonoCompiler,
+    NativeClojureCompiler,
     CudaCompiler,
     VisualStudioCsCompiler,
     NAGFortranCompiler,
@@ -496,6 +497,7 @@ class Environment:
         self.default_objcpp = ['c++']
         self.default_d = ['ldc2', 'ldc', 'gdc', 'dmd']
         self.default_java = ['javac']
+        self.default_nativeclojure = ['cljnc']
         self.default_cuda = ['nvcc']
         self.default_rust = ['rustc']
         self.default_swift = ['swiftc']
@@ -1050,6 +1052,23 @@ class Environment:
 
         self._handle_exceptions(popen_exceptions, compilers)
 
+    def detect_nativeclojure_compiler(self, want_cross):
+        # TODO: Implement this for real
+        exelist = self.binaries.host.lookup_entry('nativeclojure')
+        if exelist is None:
+            # TODO support fallback
+            exelist = [self.default_nativeclojure[0]]
+
+        try:
+            p, out = Popen_safe(exelist + ['--version'])[0:2]
+        except OSError:
+            raise EnvironmentException('Could not execute Vala compiler "%s"' % ' '.join(exelist))
+        version = search_version(out)
+        if 'Vala' in out:
+            return ValaCompiler(exelist, version)
+        raise EnvironmentException('Unknown compiler "' + ' '.join(exelist) + '"')
+
+
     def detect_vala_compiler(self):
         exelist = self.binaries.host.lookup_entry('vala')
         if exelist is None:
@@ -1162,6 +1181,8 @@ class Environment:
             comp = self.detect_cs_compiler()  # C# is platform independent.
         elif lang == 'vala':
             comp = self.detect_vala_compiler()  # Vala compiles to platform-independent C
+        elif lang == 'nativeclojure':
+            comp = self.detect_nativeclojure_compiler(want_cross)
         elif lang == 'd':
             comp = self.detect_d_compiler(want_cross)
         elif lang == 'rust':

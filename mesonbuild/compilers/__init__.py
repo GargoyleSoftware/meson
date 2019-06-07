@@ -76,6 +76,7 @@ __all__ = [
     'JavaCompiler',
     'LLVMDCompiler',
     'MonoCompiler',
+    'NativeClojureCompiler',
     'CudaCompiler',
     'VisualStudioCsCompiler',
     'NAGFortranCompiler',
@@ -179,6 +180,7 @@ from .fortran import (
     SunFortranCompiler,
 )
 from .java import JavaCompiler
+from .nativeclojure import NativeClojureCompiler
 from .objc import (
     ObjCCompiler,
     ClangObjCCompiler,
